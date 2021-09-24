@@ -1,9 +1,9 @@
 echo "Started"
-apt -y install gcc gcc-c++ make byacc wget flex bison
-apt install libpcap libpcap-devel -y
-apt install openssl-devel.x86_64 -y
+yum -y install gcc gcc-c++ make byacc wget flex bison
+yum install libpcap libpcap-devel -y
+yum install openssl-devel.x86_64 -y
 sleep 1
-apt -y groupinstall "Development tools"
+yum -y groupinstall "Development tools"
 sleep 1
 wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz
 tar -xzvf protobuf-2.5.0.tar.gz
